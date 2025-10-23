@@ -8,6 +8,8 @@ A powerful CLI tool that automatically sets up Supabase and Clerk authentication
 - **Flexible Installation**: Install Supabase only, Clerk only, or both
 - **Next.js Support**: Works with both App Router and Pages Router
 - **TypeScript Ready**: Full TypeScript support with proper type definitions
+- **Auto Provider Setup**: Automatically wraps your app with ClerkProvider
+- **Migration Support**: Optional automatic Supabase migration application
 - **Zero Configuration**: Minimal setup required, works out of the box
 - **Production Ready**: Includes middleware, security configurations, and best practices
 
@@ -40,16 +42,8 @@ This package is perfect for:
 
 ```bash
 # Install both Supabase and Clerk
-next-supabase-clerk-setup install --all
+next-supabase-clerk-setup install
 
-# Install only Supabase
-next-supabase-clerk-setup install --supabase
-
-# Install only Clerk
-next-supabase-clerk-setup install --clerk
-
-# Skip dependency installation
-next-supabase-clerk-setup install --all --skip-deps
 ```
 
 ### Check Current Setup
@@ -67,17 +61,19 @@ next-supabase-clerk-setup check
 - `lib/supabase/middleware.ts` - Authentication middleware
 - `types/supabase.ts` - TypeScript type definitions
 - `supabase/config.toml` - Supabase configuration
-- `supabase/migrations/` - Database migration files
-- Example API routes and components
+- `supabase/migrations/001_initial_schema.sql` - Initial database migration
+- `components/Profile.tsx` - Example profile component
+- Example API routes
 
 ### Clerk Setup
-- `lib/clerk.ts` - Clerk provider configuration
+- `lib/clerk.tsx` - Clerk provider configuration
 - `middleware.ts` - Clerk authentication middleware
 - `app/sign-in/[[...sign-in]]/page.tsx` - Sign-in page (App Router)
 - `app/sign-up/[[...sign-up]]/page.tsx` - Sign-up page (App Router)
 - `pages/sign-in/[[...sign-in]].tsx` - Sign-in page (Pages Router)
 - `pages/sign-up/[[...sign-up]].tsx` - Sign-up page (Pages Router)
-- Example dashboard and protected components
+- `components/Dashboard.tsx` - Example dashboard component
+- `app/api/protected/route.ts` - Example protected API route
 
 ### Configuration Files
 - `.env.local` - Environment variables template
@@ -103,92 +99,69 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 ```
 
-## 🎨 Integration Examples
+## 🎯 Advanced Usage
 
-### Using Supabase with Clerk
+### Automatic Migration Application
 
-```tsx
-'use client'
-import { createClient } from '@/lib/supabase/client'
-import { useUser } from '@clerk/nextjs'
-import { useEffect, useState } from 'react'
+The `--apply-migrations` flag automatically applies Supabase migrations using the Supabase CLI:
 
-export default function UserProfile() {
-  const { user } = useUser()
-  const [profile, setProfile] = useState(null)
-  const supabase = createClient()
+```bash
+# Install with automatic migration application
+next-supabase-clerk-setup install --supabase --apply-migrations
 
-  useEffect(() => {
-    const getProfile = async () => {
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
-        setProfile(data)
-      }
-    }
-    getProfile()
-  }, [user, supabase])
-
-  return (
-    <div>
-      <h1>Welcome, {user?.firstName}!</h1>
-      {profile && <p>Username: {profile.username}</p>}
-    </div>
-  )
-}
+# For both services with migrations
+next-supabase-clerk-setup install --all --apply-migrations
 ```
 
-### Protected API Route
+**Requirements:**
+- Supabase CLI must be installed (`brew install supabase/tap/supabase`)
+- Project must be linked (`supabase link --project-ref <PROJECT_REF>`)
 
-```tsx
-import { auth } from '@clerk/nextjs/server'
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+### Force Reconfiguration
 
-export async function GET() {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-  
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-  
-  return NextResponse.json({ data })
-}
+Use `--force` to overwrite existing configurations:
+
+```bash
+# Reconfigure everything
+next-supabase-clerk-setup install --all --force
+
+# Reconfigure only Clerk
+next-supabase-clerk-setup install --clerk --force
 ```
 
-## 🔍 Project Detection
+### Project Detection
 
-The tool automatically detects:
+The tool automatically detects your current setup:
 
-- **Project Type**: Next.js App Router vs Pages Router
-- **Existing Supabase**: Configuration files, dependencies, imports
-- **Existing Clerk**: Configuration files, dependencies, imports
-- **NextAuth**: Alternative authentication setup
-- **Dependencies**: Already installed packages
+```bash
+# Check what's already configured
+next-supabase-clerk-setup check
+```
+
+**Output example:**
+```
+🔍 Project Setup Analysis
+
+Project Type: nextjs-app
+Has Supabase: ✅ Yes
+Has Clerk: ❌ No
+Has NextAuth: ❌ No
+```
 
 ## 🚦 Commands
 
 | Command | Description |
 |---------|-------------|
 | `install` | Install and configure Supabase and/or Clerk |
+| `uninstall` | Remove Supabase and/or Clerk configuration |
 | `check` | Analyze current project setup |
-| `--supabase` | Install Supabase only |
-| `--clerk` | Install Clerk only |
-| `--all` | Install both Supabase and Clerk |
-| `--skip-deps` | Skip dependency installation |
+| `--supabase` | Install/Remove Supabase only |
+| `--clerk` | Install/Remove Clerk only |
+| `--all` | Install/Remove both Supabase and Clerk |
+| `--skip-deps` | Skip installing dependencies |
+| `--keep-deps` | Keep dependencies when uninstalling |
+| `--force` | Force reconfiguration even if already installed |
+| `--apply-migrations` | Apply Supabase migrations using Supabase CLI |
 
 ## 🛡️ Security Features
 
@@ -200,11 +173,23 @@ The tool automatically detects:
 
 ## 📚 Next Steps
 
-1. **Configure Environment Variables**: Add your Supabase and Clerk keys
+1. **Configure Environment Variables**: Add your Supabase and Clerk keys to `.env.local`
 2. **Set up Supabase Project**: Create your database and configure RLS policies
-3. **Set up Clerk Application**: Configure your authentication providers
-4. **Customize UI**: Modify the generated components to match your design
-5. **Deploy**: Your app is ready for production!
+3. **Apply Migrations**: Use `--apply-migrations` flag or run manually:
+   ```bash
+   # Install Supabase CLI
+   brew install supabase/tap/supabase
+   
+   # Login and link project
+   supabase login
+   supabase link --project-ref <YOUR_PROJECT_REF>
+   
+   # Apply migrations
+   supabase db push
+   ```
+4. **Set up Clerk Application**: Configure your authentication providers
+5. **Customize UI**: Modify the generated components to match your design
+6. **Deploy**: Your app is ready for production!
 
 ## 🤝 Contributing
 

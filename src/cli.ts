@@ -4,6 +4,8 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { setupSupabase } from './setup/supabase';
 import { setupClerk } from './setup/clerk';
+import { uninstallSupabase } from './setup/uninstall-supabase';
+import { uninstallClerk } from './setup/uninstall-clerk';
 import { detectExistingSetup, ProjectSetup } from './utils/detection';
 import { installDependencies } from './utils/installer';
 
@@ -21,6 +23,7 @@ program
   .option('-c, --clerk', 'Setup Clerk only')
   .option('-a, --all', 'Setup both Supabase and Clerk')
   .option('--skip-deps', 'Skip installing dependencies')
+  .option('--apply-migrations', 'Apply Supabase migrations using Supabase CLI if available')
   .option('--force', 'Force reconfiguration even if already installed')
   .action(async (options) => {
     try {
@@ -64,6 +67,23 @@ program
         console.log(chalk.green('✅ Dependencies installed!\n'));
       }
 
+      // Optionally apply Supabase migrations
+      if (options.applyMigrations && installSupabase) {
+        const { isSupabaseCliAvailable, applySupabaseMigrations } = await import('./utils/migrations');
+        console.log(chalk.blue('🗃️ Applying Supabase migrations...'));
+        if (isSupabaseCliAvailable()) {
+          const ok = applySupabaseMigrations();
+          if (ok) {
+            console.log(chalk.green('✅ Supabase migrations applied!\n'));
+          } else {
+            console.log(chalk.yellow('⚠️  Could not apply migrations automatically. See README for manual steps.'));
+          }
+        } else {
+          console.log(chalk.yellow('⚠️  Supabase CLI not found. Skipping migration apply.'));
+          console.log(chalk.gray('Install via: brew install supabase/tap/supabase, then run: supabase db push'));
+        }
+      }
+
       console.log(chalk.green.bold('🎉 Setup completed successfully!'));
       console.log(chalk.gray('Next steps:'));
       console.log(chalk.gray('1. Configure your environment variables in .env.local'));
@@ -104,6 +124,50 @@ program
       
     } catch (error) {
       console.error(chalk.red('❌ Analysis failed:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('uninstall')
+  .description('Remove Supabase and/or Clerk configuration from your Next.js project')
+  .option('-s, --supabase', 'Remove Supabase only')
+  .option('-c, --clerk', 'Remove Clerk only')
+  .option('-a, --all', 'Remove both Supabase and Clerk')
+  .option('--keep-deps', 'Keep dependencies in package.json')
+  .action(async (options) => {
+    try {
+      console.log(chalk.blue.bold('🗑️  Next.js Supabase & Clerk Uninstall'));
+      console.log(chalk.gray('Removing configuration...\n'));
+
+      const existingSetup = await detectExistingSetup();
+      
+      // Determine what to remove
+      const removeSupabase = options.all || options.supabase || (!options.clerk && existingSetup.hasSupabase);
+      const removeClerk = options.all || options.clerk || (!options.supabase && existingSetup.hasClerk);
+
+      if (removeSupabase && existingSetup.hasSupabase) {
+        console.log(chalk.blue('🗑️  Removing Supabase...'));
+        await uninstallSupabase(options.keepDeps);
+        console.log(chalk.green('✅ Supabase removed!\n'));
+      }
+
+      if (removeClerk && existingSetup.hasClerk) {
+        console.log(chalk.blue('🗑️  Removing Clerk...'));
+        await uninstallClerk(options.keepDeps);
+        console.log(chalk.green('✅ Clerk removed!\n'));
+      }
+
+      if (!removeSupabase && !removeClerk) {
+        console.log(chalk.yellow('⚠️  No services to remove. Use --supabase, --clerk, or --all'));
+        return;
+      }
+
+      console.log(chalk.green.bold('🎉 Uninstall completed successfully!'));
+      console.log(chalk.gray('All configuration files and dependencies have been removed.'));
+
+    } catch (error) {
+      console.error(chalk.red('❌ Uninstall failed:'), error);
       process.exit(1);
     }
   });
