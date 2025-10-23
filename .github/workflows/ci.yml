@@ -52,7 +52,12 @@ jobs:
     
     - name: Build
       run: npm run build
-    
+      
+    - name: Verify npm auth
+      run: npm whoami
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     - name: Publish to NPM
       run: npm publish
       env:

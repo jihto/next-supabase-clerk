@@ -21,6 +21,7 @@ program
   .option('-c, --clerk', 'Setup Clerk only')
   .option('-a, --all', 'Setup both Supabase and Clerk')
   .option('--skip-deps', 'Skip installing dependencies')
+  .option('--force', 'Force reconfiguration even if already installed')
   .action(async (options) => {
     try {
       console.log(chalk.blue.bold('🚀 Next.js Supabase & Clerk Setup'));
@@ -28,7 +29,7 @@ program
 
       const existingSetup = await detectExistingSetup();
       
-      if (existingSetup.hasSupabase && existingSetup.hasClerk) {
+      if (existingSetup.hasSupabase && existingSetup.hasClerk && !options.force) {
         console.log(chalk.yellow('⚠️  Both Supabase and Clerk are already configured in this project.'));
         console.log(chalk.gray('Use --force to reconfigure or specify individual services.\n'));
         return;
