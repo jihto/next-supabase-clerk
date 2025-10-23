@@ -72,7 +72,10 @@ const isProtectedRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect()
+  if (isProtectedRoute(req)) {
+    const { userId, redirectToSignIn } = auth()
+    if (!userId) return redirectToSignIn()
+  }
 })
 
 export const config = {
@@ -180,36 +183,27 @@ async function updateExistingLayout(): Promise<void> {
   try {
     const layoutPath = 'app/layout.tsx';
     const content = await fs.readFile(layoutPath, 'utf-8');
-
+    
     // Check if already has ClerkProvider
     if (content.includes('ClerkProvider') || content.includes('ClerkProviderWrapper')) {
       console.log(chalk.green('✅ ClerkProvider already exists in layout.tsx'));
       return;
     }
-
-    // Add ClerkProviderWrapper import
+    
+    // Simple approach: add import and wrap children
     let updatedContent = content;
+    
+    // Add import if not exists
     if (!content.includes("from '@/lib/clerk'")) {
-      updatedContent = content.replace(
-        /import.*from.*['"]react['"]/,
-        `import { ClerkProviderWrapper } from '@/lib/clerk'\n$&`
-      );
+      updatedContent = `import { ClerkProviderWrapper } from '@/lib/clerk'\n${updatedContent}`;
     }
-
+    
     // Wrap children with ClerkProviderWrapper
     updatedContent = updatedContent.replace(
-      /<body[^>]*>([\s\S]*?)<\/body>/,
-      (match, bodyContent) => {
-        if (bodyContent.includes('ClerkProviderWrapper')) {
-          return match; // Already wrapped
-        }
-        return match.replace(
-          bodyContent,
-          `\n        <ClerkProviderWrapper>\n          ${bodyContent.trim()}\n        </ClerkProviderWrapper>\n      `
-        );
-      }
+      /{children}/g,
+      '<ClerkProviderWrapper>{children}</ClerkProviderWrapper>'
     );
-
+    
     await fs.writeFile(layoutPath, updatedContent);
     console.log(chalk.green('✅ Updated app/layout.tsx with ClerkProviderWrapper'));
   } catch (error) {
