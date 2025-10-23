@@ -3,6 +3,9 @@
   "version": "1.0.1",
   "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "next-supabase-clerk-setup": "./dist/cli.js"
   },
