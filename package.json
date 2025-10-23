@@ -1,0 +1,71 @@
+{
+  "name": "next-supabase-clerk-setup",
+  "version": "1.0.0",
+  "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
+  "main": "dist/index.js",
+  "bin": {
+    "next-supabase-clerk-setup": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "nextjs",
+    "supabase",
+    "clerk",
+    "authentication",
+    "setup",
+    "boilerplate",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/next-supabase-clerk-setup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/next-supabase-clerk-setup/issues"
+  },
+  "homepage": "https://github.com/yourusername/next-supabase-clerk-setup#readme",
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.6",
+    "fs-extra": "^11.1.1",
+    "glob": "^10.3.10",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "next": ">=13.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": false
+    },
+    "react": {
+      "optional": false
+    },
+    "react-dom": {
+      "optional": false
+    }
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
