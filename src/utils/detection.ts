@@ -90,24 +90,8 @@ async function detectSupabase(): Promise<boolean> {
       }
     }
 
-    // Check for Supabase imports in source files
-    const sourceFiles = await glob('**/*.{ts,tsx,js,jsx}', {
-      ignore: ['node_modules/**', 'dist/**', '.next/**']
-    });
-
-    for (const file of sourceFiles) {
-      try {
-        const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('@supabase/') || content.includes('createClient')) {
-          return true;
-        }
-      } catch {
-        // Ignore files that can't be read
-      }
-    }
-
     return false;
-  } catch {
+  } catch (error) {
     return false;
   }
 }
@@ -150,24 +134,8 @@ async function detectClerk(): Promise<boolean> {
       }
     }
 
-    // Check for Clerk imports in source files
-    const sourceFiles = await glob('**/*.{ts,tsx,js,jsx}', {
-      ignore: ['node_modules/**', 'dist/**', '.next/**']
-    });
-
-    for (const file of sourceFiles) {
-      try {
-        const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('@clerk/') || content.includes('ClerkProvider')) {
-          return true;
-        }
-      } catch {
-        // Ignore files that can't be read
-      }
-    }
-
     return false;
-  } catch {
+  } catch (error) {
     return false;
   }
 }
@@ -200,3 +168,4 @@ async function detectNextAuth(): Promise<boolean> {
     return false;
   }
 }
+

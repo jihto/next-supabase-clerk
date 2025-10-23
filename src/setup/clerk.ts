@@ -278,6 +278,7 @@ export default function Dashboard() {
 }
 `;
 
+  await fs.ensureDir('components');
   await fs.writeFile('components/Dashboard.tsx', dashboardContent);
 
   // Create example API route

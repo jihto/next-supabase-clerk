@@ -498,5 +498,6 @@ export default function Profile() {
 }
 `;
 
+  await fs.ensureDir('components');
   await fs.writeFile('components/Profile.tsx', componentContent);
 }
