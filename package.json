@@ -1,5 +1,5 @@
 {
-  "name": "@jihto/next-supabase-clerk-setup",
+  "name": "next-supabase-clerk-setup",
   "version": "1.0.1",
   "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
   "main": "dist/index.js",
@@ -67,9 +67,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "public"
   }
 }
