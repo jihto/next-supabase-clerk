@@ -1,0 +1,69 @@
+{
+  "name": "next-supabase-clerk",
+  "version": "1.0.0",
+  "description": "A Next.js starter template with Supabase and Clerk authentication pre-configured",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "setup": "node scripts/setup.js",
+    "db:generate": "supabase gen types typescript --local > types/supabase.ts",
+    "db:reset": "supabase db reset",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop"
+  },
+  "keywords": [
+    "nextjs",
+    "supabase",
+    "clerk",
+    "authentication",
+    "typescript",
+    "starter",
+    "template"
+  ],
+  "author": "Jihto",
+  "license": "MIT",
+  "dependencies": {
+    "@clerk/nextjs": "^4.29.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "@supabase/ssr": "^0.1.0",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.2.0",
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "lucide-react": "^0.292.0",
+    "clsx": "^2.0.0",
+    "class-variance-authority": "^0.7.0",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss-animate": "^1.0.7",
+    "svix": "^1.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.52.0",
+    "eslint-config-next": "^14.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.5.0",
+    "supabase": "^1.123.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/next-supabase-clerk-starter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/next-supabase-clerk-starter/issues"
+  },
+  "homepage": "https://github.com/yourusername/next-supabase-clerk-starter#readme"
+}
