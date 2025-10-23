@@ -1,6 +1,6 @@
 {
-  "name": "next-supabase-clerk-setup",
-  "version": "1.0.0",
+  "name": "@jihto/next-supabase-clerk-setup",
+  "version": "1.0.1",
   "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
   "main": "dist/index.js",
   "bin": {
@@ -21,16 +21,16 @@
     "boilerplate",
     "typescript"
   ],
-  "author": "Your Name",
+  "author": "pnjihto123@gmail.com",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/next-supabase-clerk-setup.git"
+    "url": "https://github.com/jihto/next-supabase-clerk.git.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/next-supabase-clerk-setup/issues"
+    "url": "https://github.com/jihto/next-supabase-clerk.git/issues"
   },
-  "homepage": "https://github.com/yourusername/next-supabase-clerk-setup#readme",
+  "homepage": "https://github.com/jihto/next-supabase-clerk.git#readme",
   "files": [
     "dist",
     "templates",
@@ -67,5 +67,9 @@
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   }
 }

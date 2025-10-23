@@ -26,6 +26,7 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+.npmrc
 
 # Logs
 logs
