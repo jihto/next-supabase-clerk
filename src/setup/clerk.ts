@@ -13,27 +13,27 @@ export async function setupClerk(setup: ProjectSetup): Promise<void> {
 
     // Create Clerk configuration
     await createClerkConfig();
-    
+
     // Create middleware
     await createClerkMiddleware();
-    
+
     // Create sign-in page
     await createSignInPage(setup.projectType);
-    
+
     // Create sign-up page
     await createSignUpPage(setup.projectType);
-    
+
     // Create Clerk provider wrapper
     await createClerkProvider(setup.projectType);
-    
+
     // Update environment variables
     await updateEnvironmentVariables('clerk');
-    
+
     // Create example components
     await createClerkExamples();
 
     console.log(chalk.green('✅ Clerk configuration files created'));
-    
+
   } catch (error) {
     console.error(chalk.red('❌ Failed to setup Clerk:'), error);
     throw error;
@@ -42,8 +42,9 @@ export async function setupClerk(setup: ProjectSetup): Promise<void> {
 
 async function createClerkConfig(): Promise<void> {
   const configContent = `import { ClerkProvider } from '@clerk/nextjs'
+import React from 'react'
 
-export function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
+export function ClerkProviderWrapper({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <ClerkProvider
       appearance={{
@@ -58,7 +59,7 @@ export function ClerkProviderWrapper({ children }: { children: React.ReactNode }
 }
 `;
 
-  await fs.writeFile('lib/clerk.ts', configContent);
+  await fs.writeFile('lib/clerk.tsx', configContent);
 }
 
 async function createClerkMiddleware(): Promise<void> {
@@ -70,8 +71,11 @@ const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
 ])
 
-export default clerkMiddleware((auth, req) => {
-  if (isProtectedRoute(req)) auth().protect()
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    const { userId, redirectToSignIn } = await auth()
+    if (!userId) return redirectToSignIn()
+  }
 })
 
 export const config = {
@@ -128,7 +132,12 @@ export default function Page() {
 }
 
 async function createClerkProvider(projectType: string): Promise<void> {
-  const providerContent = `import { ClerkProviderWrapper } from '@/lib/clerk'
+  if (projectType === 'nextjs-app') {
+    // Check if layout.tsx already exists
+    if (await fs.pathExists('app/layout.tsx')) {
+      await updateExistingLayout();
+    } else {
+      const providerContent = `import { ClerkProviderWrapper } from '@/lib/clerk'
 
 export default function RootLayout({
   children,
@@ -146,13 +155,6 @@ export default function RootLayout({
   )
 }
 `;
-
-  if (projectType === 'nextjs-app') {
-    // Check if layout.tsx already exists
-    if (await fs.pathExists('app/layout.tsx')) {
-      console.log(chalk.yellow('⚠️  app/layout.tsx already exists. Please manually wrap your app with ClerkProviderWrapper.'));
-      await fs.writeFile('app/layout.example.tsx', providerContent);
-    } else {
       await fs.writeFile('app/layout.tsx', providerContent);
     }
   } else {
@@ -170,11 +172,88 @@ export default function App({ Component, pageProps }: AppProps) {
 `;
 
     if (await fs.pathExists('pages/_app.tsx')) {
-      console.log(chalk.yellow('⚠️  pages/_app.tsx already exists. Please manually wrap your app with ClerkProviderWrapper.'));
-      await fs.writeFile('pages/_app.example.tsx', pagesAppContent);
+      await updateExistingPagesApp();
     } else {
       await fs.writeFile('pages/_app.tsx', pagesAppContent);
     }
+  }
+}
+
+async function updateExistingLayout(): Promise<void> {
+  try {
+    const layoutPath = 'app/layout.tsx';
+    const content = await fs.readFile(layoutPath, 'utf-8');
+    
+    // Check if already has ClerkProvider
+    if (content.includes('ClerkProvider') || content.includes('ClerkProviderWrapper')) {
+      console.log(chalk.green('✅ ClerkProvider already exists in layout.tsx'));
+      return;
+    }
+    
+    // Simple approach: add import and wrap children
+    let updatedContent = content;
+    
+    // Add import if not exists
+    if (!content.includes("from '@/lib/clerk'")) {
+      updatedContent = `import { ClerkProviderWrapper } from '@/lib/clerk'\n${updatedContent}`;
+    }
+    
+    // Wrap children with ClerkProviderWrapper
+    updatedContent = updatedContent.replace(
+      /{children}/g,
+      '<ClerkProviderWrapper>{children}</ClerkProviderWrapper>'
+    );
+    
+    await fs.writeFile(layoutPath, updatedContent);
+    console.log(chalk.green('✅ Updated app/layout.tsx with ClerkProviderWrapper'));
+  } catch (error) {
+    console.log(chalk.yellow('⚠️  Could not update layout.tsx automatically. Please manually add ClerkProviderWrapper.'));
+    console.log(chalk.gray('Example: Wrap your app with <ClerkProviderWrapper>{children}</ClerkProviderWrapper>'));
+  }
+}
+
+async function updateExistingPagesApp(): Promise<void> {
+  try {
+    const appPath = 'pages/_app.tsx';
+    const content = await fs.readFile(appPath, 'utf-8');
+
+    // Check if already has ClerkProvider
+    if (content.includes('ClerkProvider') || content.includes('ClerkProviderWrapper')) {
+      console.log(chalk.green('✅ ClerkProvider already exists in _app.tsx'));
+      return;
+    }
+
+    // Add ClerkProviderWrapper import
+    let updatedContent = content;
+    if (!content.includes("from '@/lib/clerk'")) {
+      updatedContent = content.replace(
+        /import.*from.*['"]next\/app['"]/,
+        `import { ClerkProviderWrapper } from '@/lib/clerk'\n$&`
+      );
+    }
+
+    // Wrap Component with ClerkProviderWrapper
+    updatedContent = updatedContent.replace(
+      /return\s*\(\s*<Component[\s\S]*?\/>\s*\)/,
+      (match) => {
+        if (match.includes('ClerkProviderWrapper')) {
+          return match; // Already wrapped
+        }
+        return match.replace(
+          '<Component',
+          '<ClerkProviderWrapper><Component'
+        ).replace(
+          '/>',
+          '/></ClerkProviderWrapper>'
+        );
+      }
+    );
+
+    await fs.writeFile(appPath, updatedContent);
+    console.log(chalk.green('✅ Updated pages/_app.tsx with ClerkProviderWrapper'));
+  } catch (error) {
+    console.log(chalk.yellow('⚠️  Could not update _app.tsx automatically. Please manually add ClerkProviderWrapper.'));
+    console.log(chalk.gray('Example: Wrap your app with <ClerkProviderWrapper><Component {...pageProps} /></ClerkProviderWrapper>'));
   }
 }
 
@@ -278,6 +357,7 @@ export default function Dashboard() {
 }
 `;
 
+  await fs.ensureDir('components');
   await fs.writeFile('components/Dashboard.tsx', dashboardContent);
 
   // Create example API route

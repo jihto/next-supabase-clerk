@@ -70,37 +70,28 @@ async function detectSupabase(): Promise<boolean> {
       'lib/supabase/server.ts',
       'lib/supabase/middleware.ts',
       'utils/supabase.ts',
-      'supabase/config.toml',
-      '.env.local'
+      'supabase/config.toml'
     ];
 
     for (const file of supabaseFiles) {
       if (await fs.pathExists(file)) {
         const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('supabase') || content.includes('SUPABASE')) {
+        if (content.includes('@supabase/') || content.includes('createClient') || content.includes('supabase')) {
           return true;
         }
       }
     }
 
-    // Check for Supabase imports in source files
-    const sourceFiles = await glob('**/*.{ts,tsx,js,jsx}', {
-      ignore: ['node_modules/**', 'dist/**', '.next/**']
-    });
-
-    for (const file of sourceFiles) {
-      try {
-        const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('@supabase/') || content.includes('createClient')) {
-          return true;
-        }
-      } catch {
-        // Ignore files that can't be read
+    // Check .env.local for Supabase variables
+    if (await fs.pathExists('.env.local')) {
+      const content = await fs.readFile('.env.local', 'utf-8');
+      if (content.includes('NEXT_PUBLIC_SUPABASE_URL') && content.includes('NEXT_PUBLIC_SUPABASE_ANON_KEY')) {
+        return true;
       }
     }
 
     return false;
-  } catch {
+  } catch (error) {
     return false;
   }
 }
@@ -115,38 +106,36 @@ async function detectClerk(): Promise<boolean> {
 
     // Check for Clerk configuration files
     const clerkFiles = [
-      'lib/clerk.ts',
-      'middleware.ts',
-      '.env.local'
+      'lib/clerk.ts'
     ];
 
     for (const file of clerkFiles) {
       if (await fs.pathExists(file)) {
         const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('clerk') || content.includes('CLERK')) {
+        if (content.includes('@clerk/') || content.includes('ClerkProvider')) {
           return true;
         }
       }
     }
 
-    // Check for Clerk imports in source files
-    const sourceFiles = await glob('**/*.{ts,tsx,js,jsx}', {
-      ignore: ['node_modules/**', 'dist/**', '.next/**']
-    });
+    // Check middleware.ts for Clerk
+    if (await fs.pathExists('middleware.ts')) {
+      const content = await fs.readFile('middleware.ts', 'utf-8');
+      if (content.includes('clerkMiddleware') || content.includes('@clerk/nextjs/server')) {
+        return true;
+      }
+    }
 
-    for (const file of sourceFiles) {
-      try {
-        const content = await fs.readFile(file, 'utf-8');
-        if (content.includes('@clerk/') || content.includes('ClerkProvider')) {
-          return true;
-        }
-      } catch {
-        // Ignore files that can't be read
+    // Check .env.local for Clerk variables
+    if (await fs.pathExists('.env.local')) {
+      const content = await fs.readFile('.env.local', 'utf-8');
+      if (content.includes('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') && content.includes('CLERK_SECRET_KEY')) {
+        return true;
       }
     }
 
     return false;
-  } catch {
+  } catch (error) {
     return false;
   }
 }
@@ -179,3 +168,4 @@ async function detectNextAuth(): Promise<boolean> {
     return false;
   }
 }
+
