@@ -5,7 +5,8 @@ import { ProjectSetup } from './detection';
 export async function installDependencies(
   installSupabase: boolean,
   installClerk: boolean,
-  existingSetup: ProjectSetup
+  existingSetup: ProjectSetup,
+  hasWebhooks: boolean = false
 ): Promise<void> {
   const dependencies: string[] = [];
   const devDependencies: string[] = [];
@@ -19,6 +20,11 @@ export async function installDependencies(
   // Clerk dependencies
   if (installClerk && !existingSetup.hasClerk) {
     dependencies.push('@clerk/nextjs');
+  }
+
+  // Webhook dependencies
+  if (hasWebhooks) {
+    dependencies.push('svix');
   }
 
   // Common dependencies that might be needed

@@ -79,8 +79,9 @@ program
         console.log(chalk.green('✅ Clerk setup completed!\n'));
       }
 
-      // Setup webhooks if requested
-      if (options.webhooks) {
+      // Setup webhooks if requested or if both services are installed
+      const shouldSetupWebhooks = options.webhooks || (installSupabase && installClerk) || (existingSetup.hasSupabase && existingSetup.hasClerk);
+      if (shouldSetupWebhooks) {
         console.log(chalk.blue('🔗 Setting up webhooks...'));
         // Create webhooks for the services that are installed
         await setupWebhooks(installSupabase || existingSetup.hasSupabase, installClerk || existingSetup.hasClerk);
@@ -92,7 +93,7 @@ program
         // If webhooks requested, ensure we have the right services
         const finalInstallSupabase = installSupabase || (options.webhooks && !existingSetup.hasSupabase);
         const finalInstallClerk = installClerk || (options.webhooks && !existingSetup.hasClerk);
-        await installDependencies(finalInstallSupabase, finalInstallClerk, existingSetup);
+        await installDependencies(finalInstallSupabase, finalInstallClerk, existingSetup, shouldSetupWebhooks);
         console.log(chalk.green('✅ Dependencies installed!\n'));
       }
 
