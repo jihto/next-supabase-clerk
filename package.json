@@ -1,6 +1,6 @@
 {
   "name": "next-supabase-clerk-setup",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
   "main": "dist/index.js",
   "publishConfig": {
@@ -37,7 +37,8 @@
   "files": [
     "dist",
     "templates",
-    "README.md"
+    "README.md",
+    "ENHANCED_SETUP_GUIDE.md"
   ],
   "dependencies": {
     "chalk": "^4.1.2",
@@ -45,12 +46,15 @@
     "fs-extra": "^11.1.1",
     "glob": "^10.3.10",
     "commander": "^11.1.0",
-    "svix": "^1.15.0"
+    "svix": "^1.15.0",
+    "pg": "^8.11.3",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/node": "^20.8.0",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
+    "@types/pg": "^8.11.0",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {

@@ -45,6 +45,9 @@ This package is perfect for:
 # Install both Supabase and Clerk
 next-supabase-clerk-setup install
 
+# Enhanced setup with Clerk Wrapper (FDW) and Database Integration
+next-supabase-clerk-setup enhanced
+
 ```
 
 ### Check Current Setup
@@ -67,6 +70,8 @@ next-supabase-clerk-setup check --detailed
 - `supabase/config.toml` - Supabase configuration
 - `supabase/migrations/001_initial_schema.sql` - Initial database migration
 - `components/Profile.tsx` - Example profile component
+- `components/ConnectionTest.tsx` - Connection test component
+- `app/connection-test/page.tsx` - Demo page for connection testing
 - Example API routes
 
 ### Clerk Setup
@@ -157,6 +162,34 @@ next-supabase-clerk-setup install --all --force
 next-supabase-clerk-setup install --clerk --force
 ```
 
+### Enhanced Setup (NEW!)
+
+The `enhanced` command provides advanced setup with Clerk Wrapper (FDW) and Database Integration:
+
+```bash
+# Full enhanced setup
+next-supabase-clerk-setup enhanced
+
+# Enhanced setup without Clerk Wrapper
+next-supabase-clerk-setup enhanced --no-wrapper
+
+# Enhanced setup without Database Integration
+next-supabase-clerk-setup enhanced --no-integration
+
+# Enhanced setup with specific Clerk tables
+next-supabase-clerk-setup enhanced --tables "users,organizations"
+
+# Enhanced setup with custom webhook URL
+next-supabase-clerk-setup enhanced --webhook-url "https://myapp.com/api/webhooks/clerk"
+```
+
+**Enhanced Setup Features:**
+- **Clerk Wrapper (FDW)**: Query Clerk data directly from Postgres using Foreign Data Wrappers
+- **Database Integration**: Automatic schema creation with RLS policies
+- **Webhook Infrastructure**: Complete webhook setup with database triggers
+- **Environment Validation**: Comprehensive environment variable checking
+- **Migration Support**: Automatic Supabase migration application
+
 ### Enhanced Project Analysis
 
 The `check` command provides comprehensive analysis of your project:
@@ -199,6 +232,7 @@ Has NextAuth: ❌ No
 | Command | Description |
 |---------|-------------|
 | `install` | Install and configure Supabase and/or Clerk |
+| `enhanced` | **NEW!** Enhanced setup with Clerk Wrapper (FDW) and Database Integration |
 | `uninstall` | Remove Supabase and/or Clerk configuration |
 | `check` | Analyze current project setup |
 | `--supabase` | Install/Remove Supabase only |
@@ -220,8 +254,9 @@ Has NextAuth: ❌ No
 ## 📚 Next Steps
 
 1. **Configure Environment Variables**: Add your Supabase and Clerk keys to `.env.local`
-2. **Set up Supabase Project**: Create your database and configure RLS policies
-3. **Apply Migrations**: Use `--apply-migrations` flag or run manually:
+2. **Test Connections**: Visit `/connection-test` to verify your setup
+3. **Set up Supabase Project**: Create your database and configure RLS policies
+4. **Apply Migrations**: Use `--apply-migrations` flag or run manually:
    ```bash
    # Install Supabase CLI
    brew install supabase/tap/supabase

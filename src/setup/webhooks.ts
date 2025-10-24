@@ -95,6 +95,12 @@ async function createClerkWebhook(): Promise<void> {
   const webhookContent = `import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+// Initialize Supabase client with service role key for server-side operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
   try {
@@ -118,8 +124,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the body
-    const payload = await request.json()
-    const body = JSON.stringify(payload)
+    const payload = await request.text()
+    const body = JSON.parse(payload)
 
     // Create a new Svix instance with your secret.
     const wh = new Webhook(WEBHOOK_SECRET)
@@ -128,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the payload with the headers
     try {
-      evt = wh.verify(body, {
+      evt = wh.verify(payload, {
         'svix-id': svix_id,
         'svix-timestamp': svix_timestamp,
         'svix-signature': svix_signature,
@@ -172,20 +178,81 @@ export async function POST(request: NextRequest) {
 
 async function handleUserCreated(data: any) {
   console.log('User created:', data)
-  // Handle user creation (e.g., create user profile in database)
-  // Example: Create user record, send welcome email, etc.
+  const { id, email_addresses, first_name, last_name, image_url } = data
+
+  try {
+    // Update user profile in Supabase
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        email: email_addresses[0]?.email_address || '',
+        first_name: first_name || '',
+        last_name: last_name || '',
+        image_url: image_url || '',
+      })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error updating user profile:', error)
+      return new Response('Error updating user profile', { status: 500 })
+    }
+
+    console.log('User profile updated successfully:', id)
+  } catch (error) {
+    console.error('Error processing user.updated webhook:', error)
+    return new Response('Error processing webhook', { status: 500 })
+  }
 }
 
 async function handleUserUpdated(data: any) {
   console.log('User updated:', data)
-  // Handle user updates (e.g., update user profile)
-  // Example: Update user record, sync with external services, etc.
+  const { id, email_addresses, first_name, last_name, image_url } = data
+
+  try {
+    // Update user profile in Supabase
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        email: email_addresses[0]?.email_address || '',
+        first_name: first_name || '',
+        last_name: last_name || '',
+        image_url: image_url || '',
+      })
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error updating user profile:', error)
+      return new Response('Error updating user profile', { status: 500 })
+    }
+
+    console.log('User profile updated successfully:', id)
+  } catch (error) {
+    console.error('Error processing user.updated webhook:', error)
+    return new Response('Error processing webhook', { status: 500 })
+  }
 }
 
 async function handleUserDeleted(data: any) {
   console.log('User deleted:', data)
-  // Handle user deletion (e.g., cleanup user data)
-  // Example: Delete user records, cleanup related data, etc.
+  const { id } = data
+
+  try {
+    // Delete user profile from Supabase (CASCADE will handle related tasks)
+    const { error } = await supabase
+      .from('profiles')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Error deleting user profile:', error)
+      return new Response('Error deleting user profile', { status: 500 })
+    }
+
+    console.log('User profile deleted successfully:', id)
+  } catch (error) {
+    console.error('Error processing user.deleted webhook:', error)
+    return new Response('Error processing webhook', { status: 500 })
+  }
 }
 
 async function handleSessionCreated(data: any) {
@@ -199,6 +266,7 @@ async function handleSessionEnded(data: any) {
   // Handle session end (e.g., log logout events)
   // Example: Track logout events, cleanup session data, etc.
 }
+
 `;
 
   await fs.writeFile('app/api/webhooks/clerk/route.ts', webhookContent);

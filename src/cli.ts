@@ -7,6 +7,7 @@ import { setupClerk } from './setup/clerk';
 import { setupWebhooks } from './setup/webhooks';
 import { uninstallSupabase } from './setup/uninstall-supabase';
 import { uninstallClerk } from './setup/uninstall-clerk';
+import { EnhancedClerkSupabaseSetup } from './setup/enhanced-setup';
 import { detectExistingSetup, ProjectSetup } from './utils/detection';
 import { installDependencies } from './utils/installer';
 import fs from 'fs-extra';
@@ -199,6 +200,28 @@ program
       
     } catch (error) {
       console.error(chalk.red('❌ Analysis failed:'), error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('enhanced')
+  .description('Enhanced setup with Clerk Wrapper (FDW) and Database Integration')
+  .option('--no-wrapper', 'Skip Clerk Wrapper (FDW) setup')
+  .option('--no-integration', 'Skip Database Integration setup')
+  .option('--no-vault', 'Don\'t use Vault for storing Clerk API key')
+  .option('--no-webhooks', 'Skip webhook infrastructure setup')
+  .option('--skip-deps', 'Skip installing dependencies')
+  .option('--apply-migrations', 'Apply Supabase migrations using Supabase CLI')
+  .option('--tables <list>', 'Import only specific Clerk tables (comma-separated)')
+  .option('--exclude-tables <list>', 'Import all tables except specified ones (comma-separated)')
+  .option('--webhook-url <url>', 'Set custom webhook URL')
+  .action(async (options) => {
+    try {
+      const setup = new EnhancedClerkSupabaseSetup(options);
+      await setup.run();
+    } catch (error) {
+      console.error(chalk.red('❌ Enhanced setup failed:'), error);
       process.exit(1);
     }
   });

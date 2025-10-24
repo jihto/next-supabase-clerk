@@ -500,4 +500,185 @@ export default function Profile() {
 
   await fs.ensureDir('components');
   await fs.writeFile('components/Profile.tsx', componentContent);
+  console.log(chalk.gray('  Created: components/Profile.tsx'));
+
+  // Create Connection Test component
+  const connectionTestContent = `import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
+
+interface ConnectionStatus {
+  supabase: {
+    connected: boolean
+    error?: string
+    url?: string
+  }
+  clerk: {
+    connected: boolean
+    error?: string
+    publishableKey?: string
+  }
+}
+
+export default function ConnectionTest() {
+  const [status, setStatus] = useState<ConnectionStatus>({
+    supabase: { connected: false },
+    clerk: { connected: false }
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    testConnections()
+  }, [])
+
+  const testConnections = async () => {
+    const newStatus: ConnectionStatus = {
+      supabase: { connected: false },
+      clerk: { connected: false }
+    }
+
+    // Test Supabase connection
+    try {
+      const supabase = createClient()
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        newStatus.supabase.error = 'Missing environment variables'
+      } else {
+        // Test connection by getting session
+        const { data, error } = await supabase.auth.getSession()
+        if (error) {
+          newStatus.supabase.error = error.message
+        } else {
+          newStatus.supabase.connected = true
+          newStatus.supabase.url = supabaseUrl
+        }
+      }
+    } catch (error) {
+      newStatus.supabase.error = error instanceof Error ? error.message : 'Unknown error'
+    }
+
+    // Test Clerk connection
+    try {
+      const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+      const clerkSecretKey = process.env.CLERK_SECRET_KEY
+
+      if (!clerkPublishableKey || !clerkSecretKey) {
+        newStatus.clerk.error = 'Missing environment variables'
+      } else if (!clerkPublishableKey.startsWith('pk_') || !clerkSecretKey.startsWith('sk_')) {
+        newStatus.clerk.error = 'Invalid key format'
+      } else {
+        newStatus.clerk.connected = true
+        newStatus.clerk.publishableKey = clerkPublishableKey
+      }
+    } catch (error) {
+      newStatus.clerk.error = error instanceof Error ? error.message : 'Unknown error'
+    }
+
+    setStatus(newStatus)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-bold mb-4">Connection Test</h2>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Connection Test</h2>
+      
+      <div className="space-y-4">
+        {/* Supabase Status */}
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-semibold">Supabase</h3>
+            {status.supabase.connected ? (
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                ✅ Connected
+              </span>
+            ) : (
+              <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                ❌ Disconnected
+              </span>
+            )}
+          </div>
+          
+          {status.supabase.connected ? (
+            <div className="text-sm text-gray-600">
+              <p>URL: {status.supabase.url}</p>
+            </div>
+          ) : (
+            <div className="text-sm text-red-600">
+              <p>Error: {status.supabase.error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Clerk Status */}
+        <div className="border rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="font-semibold">Clerk</h3>
+            {status.clerk.connected ? (
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                ✅ Connected
+              </span>
+            ) : (
+              <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                ❌ Disconnected
+              </span>
+            )}
+          </div>
+          
+          {status.clerk.connected ? (
+            <div className="text-sm text-gray-600">
+              <p>Publishable Key: {status.clerk.publishableKey?.substring(0, 20)}...</p>
+            </div>
+          ) : (
+            <div className="text-sm text-red-600">
+              <p>Error: {status.clerk.error}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Test Button */}
+        <button
+          onClick={testConnections}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        >
+          Test Connections Again
+        </button>
+      </div>
+    </div>
+  )
+}`;
+
+  await fs.writeFile('components/ConnectionTest.tsx', connectionTestContent);
+  console.log(chalk.gray('  Created: components/ConnectionTest.tsx'));
+
+  // Create demo page for connection test
+  const demoPageContent = `import ConnectionTest from '@/components/ConnectionTest'
+
+export default function ConnectionTestPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-sm">
+          <ConnectionTest />
+        </div>
+      </div>
+    </div>
+  )
+}`;
+
+  await fs.ensureDir('app/connection-test');
+  await fs.writeFile('app/connection-test/page.tsx', demoPageContent);
+  console.log(chalk.gray('  Created: app/connection-test/page.tsx'));
 }
