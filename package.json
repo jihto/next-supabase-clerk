@@ -1,6 +1,6 @@
 {
-  "name": "next-supabase-clerk-setup",  
-  "version": "1.0.5",
+  "name": "@jihto/next-supabase-clerk-setup",
+  "version": "1.0.9",
   "description": "Automated setup package for integrating Supabase and Clerk with Next.js projects",
   "main": "dist/index.js",
   "publishConfig": {
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jihto/next-supabase-clerk.git.git"
+    "url": "https://github.com/jihto/next-supabase-clerk.git"
   },
   "bugs": {
     "url": "https://github.com/jihto/next-supabase-clerk.git/issues"

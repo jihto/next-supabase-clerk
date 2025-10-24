@@ -10,6 +10,7 @@ A powerful CLI tool that automatically sets up Supabase and Clerk authentication
 - **TypeScript Ready**: Full TypeScript support with proper type definitions
 - **Auto Provider Setup**: Automatically wraps your app with ClerkProvider
 - **Migration Support**: Optional automatic Supabase migration application
+- **Webhook Support**: Optional webhook endpoints for Supabase and Clerk events
 - **Zero Configuration**: Minimal setup required, works out of the box
 - **Production Ready**: Includes middleware, security configurations, and best practices
 
@@ -49,8 +50,11 @@ next-supabase-clerk-setup install
 ### Check Current Setup
 
 ```bash
-# Analyze your current project setup
+# Basic check - shows what's installed
 next-supabase-clerk-setup check
+
+# Detailed check - shows environment variables, files, dependencies, and connection status
+next-supabase-clerk-setup check --detailed
 ```
 
 ## 📁 What Gets Created
@@ -74,6 +78,11 @@ next-supabase-clerk-setup check
 - `pages/sign-up/[[...sign-up]].tsx` - Sign-up page (Pages Router)
 - `components/Dashboard.tsx` - Example dashboard component
 - `app/api/protected/route.ts` - Example protected API route
+
+### Webhook Setup (Optional)
+- `app/api/webhooks/supabase/route.ts` - Supabase webhook endpoint
+- `app/api/webhooks/clerk/route.ts` - Clerk webhook endpoint
+- `lib/webhook-utils.ts` - Webhook verification utilities
 
 ### Configuration Files
 - `.env.local` - Environment variables template
@@ -117,6 +126,25 @@ next-supabase-clerk-setup install --all --apply-migrations
 - Supabase CLI must be installed (`brew install supabase/tap/supabase`)
 - Project must be linked (`supabase link --project-ref <PROJECT_REF>`)
 
+### Webhook Support
+
+Add webhook endpoints for real-time event handling:
+
+```bash
+# Install with webhook endpoints
+next-supabase-clerk-setup install --all --webhooks
+
+# Install only Supabase with webhooks
+next-supabase-clerk-setup install --supabase --webhooks
+
+# Install only Clerk with webhooks
+next-supabase-clerk-setup install --clerk --webhooks
+```
+
+**Webhook endpoints created:**
+- `/api/webhooks/supabase` - For Supabase database events
+- `/api/webhooks/clerk` - For Clerk authentication events
+
 ### Force Reconfiguration
 
 Use `--force` to overwrite existing configurations:
@@ -128,6 +156,24 @@ next-supabase-clerk-setup install --all --force
 # Reconfigure only Clerk
 next-supabase-clerk-setup install --clerk --force
 ```
+
+### Enhanced Project Analysis
+
+The `check` command provides comprehensive analysis of your project:
+
+**Basic Check (`check`):**
+- Project type detection
+- Service availability (Supabase, Clerk, NextAuth)
+- Webhook configuration status
+- Configuration file detection
+- Smart recommendations
+
+**Detailed Check (`check --detailed`):**
+- Environment variable validation
+- Configuration file completeness
+- Dependency verification
+- Connection status validation
+- Webhook secret verification
 
 ### Project Detection
 
