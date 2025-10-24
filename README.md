@@ -23,7 +23,7 @@ npm install -g next-supabase-clerk-setup
 
 ### Quick Started
 ```bash
-npx next-supabase-clerk-setup
+npx next-supabase-clerk-setup install
 ```
 
 ## 🎯 Use Cases
