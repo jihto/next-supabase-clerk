@@ -69,6 +69,7 @@ next-supabase-clerk-setup check --detailed
 - `types/supabase.ts` - TypeScript type definitions
 - `supabase/config.toml` - Supabase configuration
 - `supabase/migrations/001_initial_schema.sql` - Initial database migration
+- `supabase/enhanced-setup.sql` - Complete enhanced database setup
 - `components/Profile.tsx` - Example profile component
 - `components/ConnectionTest.tsx` - Connection test component
 - `app/connection-test/page.tsx` - Demo page for connection testing
@@ -149,6 +150,27 @@ next-supabase-clerk-setup install --clerk --webhooks
 **Webhook endpoints created:**
 - `/api/webhooks/supabase` - For Supabase database events
 - `/api/webhooks/clerk` - For Clerk authentication events
+
+### Enhanced Database Setup
+
+The package automatically creates a complete enhanced SQL setup file:
+
+```bash
+# File is created automatically during install
+# Location: supabase/enhanced-setup.sql
+
+# To use the enhanced setup:
+# 1. Go to Supabase Dashboard → SQL Editor
+# 2. Copy and run: supabase/enhanced-setup.sql
+```
+
+**Enhanced features include:**
+- Complete database schema with RLS
+- User profiles, tasks, organizations tables
+- Webhook event processing
+- Clerk data synchronization
+- Performance optimized indexes
+- Auto-generated on every install
 
 ### Force Reconfiguration
 
@@ -255,7 +277,9 @@ Has NextAuth: ❌ No
 
 1. **Configure Environment Variables**: Add your Supabase and Clerk keys to `.env.local`
 2. **Test Connections**: Visit `/connection-test` to verify your setup
-3. **Set up Supabase Project**: Create your database and configure RLS policies
+3. **Set up Database Schema**: Choose one of these options:
+   - **Option A**: Use `--apply-migrations` flag for basic setup
+   - **Option B**: Use `supabase/enhanced-setup.sql` for complete setup
 4. **Apply Migrations**: Use `--apply-migrations` flag or run manually:
    ```bash
    # Install Supabase CLI

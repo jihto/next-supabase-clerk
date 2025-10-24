@@ -422,3 +422,4 @@ if (require.main === module) {
 
 export { EnhancedClerkSupabaseSetup };
 export type { EnhancedSetupOptions };
+
