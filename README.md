@@ -21,10 +21,9 @@ A powerful CLI tool that automatically sets up Supabase and Clerk authentication
 npm install -g next-supabase-clerk-setup
 ```
 
-### Local Installation
+### Quick Started
 ```bash
-npm install --save-dev next-supabase-clerk-setup
-npx next-supabase-clerk-setup install
+npx next-supabase-clerk-setup
 ```
 
 ## 🎯 Use Cases
@@ -43,10 +42,10 @@ This package is perfect for:
 
 ```bash
 # Install both Supabase and Clerk
-next-supabase-clerk-setup install
+npx next-supabase-clerk-setup install 
 
 # Enhanced setup with Clerk Wrapper (FDW) and Database Integration
-next-supabase-clerk-setup enhanced
+npx next-supabase-clerk-setup enhanced
 
 ```
 
@@ -54,10 +53,10 @@ next-supabase-clerk-setup enhanced
 
 ```bash
 # Basic check - shows what's installed
-next-supabase-clerk-setup check
+npx next-supabase-clerk-setup check
 
 # Detailed check - shows environment variables, files, dependencies, and connection status
-next-supabase-clerk-setup check --detailed
+npx next-supabase-clerk-setup check --detailed
 ```
 
 ## 📁 What Gets Created
@@ -68,8 +67,7 @@ next-supabase-clerk-setup check --detailed
 - `lib/supabase/middleware.ts` - Authentication middleware
 - `types/supabase.ts` - TypeScript type definitions
 - `supabase/config.toml` - Supabase configuration
-- `supabase/migrations/001_initial_schema.sql` - Initial database migration
-- `supabase/enhanced-setup.sql` - Complete enhanced database setup
+- `supabase/migrations/001_initial_schema.sql` - Complete enhanced database setup with Clerk integration
 - `components/Profile.tsx` - Example profile component
 - `components/ConnectionTest.tsx` - Connection test component
 - `app/connection-test/page.tsx` - Demo page for connection testing
@@ -153,22 +151,22 @@ next-supabase-clerk-setup install --clerk --webhooks
 
 ### Enhanced Database Setup
 
-The package automatically creates a complete enhanced SQL setup file:
+The package automatically creates a complete enhanced SQL setup in the migration file:
 
 ```bash
 # File is created automatically during install
-# Location: supabase/enhanced-setup.sql
+# Location: supabase/migrations/001_initial_schema.sql
 
 # To use the enhanced setup:
 # 1. Go to Supabase Dashboard → SQL Editor
-# 2. Copy and run: supabase/enhanced-setup.sql
+# 2. Copy and run: supabase/migrations/001_initial_schema.sql
 ```
 
 **Enhanced features include:**
 - Complete database schema with RLS
 - User profiles, tasks, organizations tables
 - Webhook event processing
-- Clerk data synchronization
+- Clerk user ID integration (not UUID)
 - Performance optimized indexes
 - Auto-generated on every install
 
