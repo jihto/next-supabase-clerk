@@ -82,8 +82,8 @@ program
       // Setup webhooks if requested
       if (options.webhooks) {
         console.log(chalk.blue('🔗 Setting up webhooks...'));
-        // Always create webhooks for both services if webhooks are requested
-        await setupWebhooks(true, true);
+        // Create webhooks for the services that are installed
+        await setupWebhooks(installSupabase || existingSetup.hasSupabase, installClerk || existingSetup.hasClerk);
         console.log(chalk.green('✅ Webhooks setup completed!\n'));
       }
 

@@ -27,6 +27,9 @@ export async function setupWebhooks(installSupabase: boolean, installClerk: bool
 }
 
 async function createSupabaseWebhook(): Promise<void> {
+  // Ensure directory exists
+  await fs.ensureDir('app/api/webhooks/supabase');
+  
   const webhookContent = `import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -86,6 +89,9 @@ async function handleDeleteEvent(data: any) {
 }
 
 async function createClerkWebhook(): Promise<void> {
+  // Ensure directory exists
+  await fs.ensureDir('app/api/webhooks/clerk');
+  
   const webhookContent = `import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
