@@ -52,6 +52,20 @@ program
       // Determine what to install
       const installSupabase = options.all || options.supabase || (!options.clerk && !existingSetup.hasSupabase);
       const installClerk = options.all || options.clerk || (!options.supabase && !existingSetup.hasClerk);
+      
+      // If webhooks requested but no services selected, install both
+      if (options.webhooks && !options.supabase && !options.clerk && !options.all) {
+        if (!existingSetup.hasSupabase) {
+          console.log(chalk.blue('📦 Setting up Supabase (required for webhooks)...'));
+          await setupSupabase(setupConfig);
+          console.log(chalk.green('✅ Supabase setup completed!\n'));
+        }
+        if (!existingSetup.hasClerk) {
+          console.log(chalk.blue('🔐 Setting up Clerk (required for webhooks)...'));
+          await setupClerk(setupConfig);
+          console.log(chalk.green('✅ Clerk setup completed!\n'));
+        }
+      }
 
       if (installSupabase && !existingSetup.hasSupabase) {
         console.log(chalk.blue('📦 Setting up Supabase...'));
@@ -68,13 +82,17 @@ program
       // Setup webhooks if requested
       if (options.webhooks) {
         console.log(chalk.blue('🔗 Setting up webhooks...'));
-        await setupWebhooks(installSupabase, installClerk);
+        // Always create webhooks for both services if webhooks are requested
+        await setupWebhooks(true, true);
         console.log(chalk.green('✅ Webhooks setup completed!\n'));
       }
 
       if (!options.skipDeps) {
         console.log(chalk.blue('📥 Installing dependencies...'));
-        await installDependencies(installSupabase, installClerk, existingSetup);
+        // If webhooks requested, ensure we have the right services
+        const finalInstallSupabase = installSupabase || (options.webhooks && !existingSetup.hasSupabase);
+        const finalInstallClerk = installClerk || (options.webhooks && !existingSetup.hasClerk);
+        await installDependencies(finalInstallSupabase, finalInstallClerk, existingSetup);
         console.log(chalk.green('✅ Dependencies installed!\n'));
       }
 
