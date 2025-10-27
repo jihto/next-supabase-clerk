@@ -3,7 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { ProjectSetup } from '../utils/detection';
 
-export async function setupSupabase(setup: ProjectSetup): Promise<void> {
+export async function setupSupabase(setup: ProjectSetup, force: boolean = false): Promise<void> {
   try {
     // Create necessary directories
     await fs.ensureDir('lib/supabase');
@@ -29,7 +29,7 @@ export async function setupSupabase(setup: ProjectSetup): Promise<void> {
     await createSupabaseConfig();
     
     // Update environment variables
-    await updateEnvironmentVariables('supabase');
+    await updateEnvironmentVariables('supabase', force);
     
     // Create example usage files
     await createSupabaseExamples(setup.projectType);
@@ -753,7 +753,7 @@ policy = "oneshot"
   await fs.writeFile('supabase/config.toml', configContent);
 }
 
-async function updateEnvironmentVariables(service: 'supabase' | 'clerk'): Promise<void> {
+async function updateEnvironmentVariables(service: 'supabase' | 'clerk', force: boolean = false): Promise<void> {
   const envPath = '.env.local';
   let envContent = '';
 
@@ -770,8 +770,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 `;
 
-    // Check if Supabase vars already exist
-    if (!envContent.includes('NEXT_PUBLIC_SUPABASE_URL')) {
+    // Check if Supabase vars already exist (skip check if force is true)
+    if (force || !envContent.includes('NEXT_PUBLIC_SUPABASE_URL')) {
       envContent += supabaseEnvVars;
     }
   }

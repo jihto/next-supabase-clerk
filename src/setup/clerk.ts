@@ -3,7 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import { ProjectSetup } from '../utils/detection';
 
-export async function setupClerk(setup: ProjectSetup): Promise<void> {
+export async function setupClerk(setup: ProjectSetup, force: boolean = false): Promise<void> {
   try {
     // Create necessary directories
     await fs.ensureDir('lib');
@@ -27,7 +27,7 @@ export async function setupClerk(setup: ProjectSetup): Promise<void> {
     await createClerkProvider(setup.projectType);
 
     // Update environment variables
-    await updateEnvironmentVariables('clerk');
+    await updateEnvironmentVariables('clerk', force);
 
     // Create example components
     await createClerkExamples();
@@ -253,7 +253,7 @@ async function updateExistingPagesApp(): Promise<void> {
   }
 }
 
-async function updateEnvironmentVariables(service: 'supabase' | 'clerk'): Promise<void> {
+async function updateEnvironmentVariables(service: 'supabase' | 'clerk', force: boolean = false): Promise<void> {
   const envPath = '.env.local';
   let envContent = '';
 
@@ -273,8 +273,8 @@ NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
 `;
 
-    // Check if Clerk vars already exist
-    if (!envContent.includes('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY')) {
+    // Check if Clerk vars already exist (skip check if force is true)
+    if (force || !envContent.includes('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY')) {
       envContent += clerkEnvVars;
     }
   }

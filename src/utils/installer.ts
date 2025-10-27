@@ -6,19 +6,20 @@ export async function installDependencies(
   installSupabase: boolean,
   installClerk: boolean,
   existingSetup: ProjectSetup,
-  hasWebhooks: boolean = false
+  hasWebhooks: boolean = false,
+  force: boolean = false
 ): Promise<void> {
   const dependencies: string[] = [];
   const devDependencies: string[] = [];
 
-  // Supabase dependencies
-  if (installSupabase && !existingSetup.hasSupabase) {
+  // Supabase dependencies - install if requested and either not detected or force is true
+  if (installSupabase && (!existingSetup.hasSupabase || force)) {
     dependencies.push('@supabase/supabase-js', '@supabase/ssr');
     devDependencies.push('@types/node');
   }
 
-  // Clerk dependencies
-  if (installClerk && !existingSetup.hasClerk) {
+  // Clerk dependencies - install if requested and either not detected or force is true
+  if (installClerk && (!existingSetup.hasClerk || force)) {
     dependencies.push('@clerk/nextjs');
   }
 
@@ -35,7 +36,7 @@ export async function installDependencies(
     }
   }
 
-  if (dependencies.length === 0 && devDependencies.length === 0) {
+  if (dependencies.length === 0 && devDependencies.length === 0 && !force) {
     console.log(chalk.gray('No new dependencies to install.'));
     return;
   }

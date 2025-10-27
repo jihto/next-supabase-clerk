@@ -51,32 +51,33 @@ program
       };
 
       // Determine what to install
-      const installSupabase = options.all || options.supabase || (!options.clerk && !existingSetup.hasSupabase);
-      const installClerk = options.all || options.clerk || (!options.supabase && !existingSetup.hasClerk);
+      // Determine what to install - when --force is used, always install regardless of detection
+      const installSupabase = options.all || options.supabase || (!options.clerk && (!existingSetup.hasSupabase || options.force));
+      const installClerk = options.all || options.clerk || (!options.supabase && (!existingSetup.hasClerk || options.force));
       
       // If webhooks requested but no services selected, install both
       if (options.webhooks && !options.supabase && !options.clerk && !options.all) {
-        if (!existingSetup.hasSupabase) {
+        if (!existingSetup.hasSupabase || options.force) {
           console.log(chalk.blue('📦 Setting up Supabase (required for webhooks)...'));
-          await setupSupabase(setupConfig);
+          await setupSupabase(setupConfig, options.force);
           console.log(chalk.green('✅ Supabase setup completed!\n'));
         }
-        if (!existingSetup.hasClerk) {
+        if (!existingSetup.hasClerk || options.force) {
           console.log(chalk.blue('🔐 Setting up Clerk (required for webhooks)...'));
-          await setupClerk(setupConfig);
+          await setupClerk(setupConfig, options.force);
           console.log(chalk.green('✅ Clerk setup completed!\n'));
         }
       }
 
-      if (installSupabase && !existingSetup.hasSupabase) {
+      if (installSupabase && (!existingSetup.hasSupabase || options.force)) {
         console.log(chalk.blue('📦 Setting up Supabase...'));
-        await setupSupabase(setupConfig);
+        await setupSupabase(setupConfig, options.force);
         console.log(chalk.green('✅ Supabase setup completed!\n'));
       }
 
-      if (installClerk && !existingSetup.hasClerk) {
+      if (installClerk && (!existingSetup.hasClerk || options.force)) {
         console.log(chalk.blue('🔐 Setting up Clerk...'));
-        await setupClerk(setupConfig);
+        await setupClerk(setupConfig, options.force);
         console.log(chalk.green('✅ Clerk setup completed!\n'));
       }
 
@@ -92,9 +93,9 @@ program
       if (!options.skipDeps) {
         console.log(chalk.blue('📥 Installing dependencies...'));
         // If webhooks requested, ensure we have the right services
-        const finalInstallSupabase = installSupabase || (options.webhooks && !existingSetup.hasSupabase);
-        const finalInstallClerk = installClerk || (options.webhooks && !existingSetup.hasClerk);
-        await installDependencies(finalInstallSupabase, finalInstallClerk, existingSetup, shouldSetupWebhooks);
+        const finalInstallSupabase = installSupabase || (options.webhooks && (!existingSetup.hasSupabase || options.force));
+        const finalInstallClerk = installClerk || (options.webhooks && (!existingSetup.hasClerk || options.force));
+        await installDependencies(finalInstallSupabase, finalInstallClerk, existingSetup, shouldSetupWebhooks, options.force);
         console.log(chalk.green('✅ Dependencies installed!\n'));
       }
 
@@ -316,6 +317,7 @@ async function checkEnvironmentVariables(setup: ProjectSetup): Promise<void> {
       const clerkSecretKey = envContent.includes('CLERK_SECRET_KEY=');
       const clerkSignInUrl = envContent.includes('NEXT_PUBLIC_CLERK_SIGN_IN_URL=');
       const clerkSignUpUrl = envContent.includes('NEXT_PUBLIC_CLERK_SIGN_UP_URL=');
+      const clerkWebhookSecret = envContent.includes('CLERK_WEBHOOK_SECRET=');
       
       console.log(chalk.gray('  Clerk:'));
       console.log(clerkPublishableKey ? chalk.green('    ✅ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY') : chalk.red('    ❌ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY'));
@@ -323,18 +325,13 @@ async function checkEnvironmentVariables(setup: ProjectSetup): Promise<void> {
       console.log(clerkSignInUrl ? chalk.green('    ✅ NEXT_PUBLIC_CLERK_SIGN_IN_URL') : chalk.red('    ❌ NEXT_PUBLIC_CLERK_SIGN_IN_URL'));
       console.log(clerkSignUpUrl ? chalk.green('    ✅ NEXT_PUBLIC_CLERK_SIGN_UP_URL') : chalk.red('    ❌ NEXT_PUBLIC_CLERK_SIGN_UP_URL'));
     }
-    
-    // Check webhook secrets
-    const hasWebhooks = await checkWebhookSetup();
-    if (hasWebhooks) {
+     
       const supabaseWebhookSecret = envContent.includes('SUPABASE_WEBHOOK_SECRET=');
       const clerkWebhookSecret = envContent.includes('CLERK_WEBHOOK_SECRET=');
       
       console.log(chalk.gray('  Webhooks:'));
       console.log(supabaseWebhookSecret ? chalk.green('    ✅ SUPABASE_WEBHOOK_SECRET') : chalk.red('    ❌ SUPABASE_WEBHOOK_SECRET'));
-      console.log(clerkWebhookSecret ? chalk.green('    ✅ CLERK_WEBHOOK_SECRET') : chalk.red('    ❌ CLERK_WEBHOOK_SECRET'));
-    }
-    
+      console.log(clerkWebhookSecret ? chalk.green('    ✅ CLERK_WEBHOOK_SECRET') : chalk.red('    ❌ CLERK_WEBHOOK_SECRET'));    
   } catch (error) {
     console.log(chalk.red('  ❌ Error reading .env.local file'));
   }
